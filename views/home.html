@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Maskapai</title>
+    <link rel="stylesheet" href="../public/css/bootstrap.min.css">
+    <style>
+        body {
+            background-image: url('Pastel Color Wallpaper.jpg'); /* Menambahkan gambar latar belakang di body */
+            background-size: cover; /* Agar gambar menutupi seluruh area */
+            background-position: center; /* Menempatkan gambar di tengah */
+            background-attachment: fixed; /* Agar gambar tetap di tempat saat discroll */
+            }
+
+    .container {
+        background-color:pink; /* Latar belakang form menjadi pink */
+        border-radius: 10px; /* Agar sudutnya melengkung */
+        padding: 20px;
+    }
+
+    .table-responsive {
+        background-color: white; /* Latar belakang tabel tetap putih */
+        padding: 20px;  /* Menambahkan padding agar ada ruang di sekitar tabel */
+    }
+
+    table {
+        background-color: white; /* Pastikan tabel tetap memiliki latar belakang putih */
+        border-radius: 8px; /* Tambahkan border-radius jika ingin sudut tabel melengkung */
+    }
+
+    </style> 
+</head>
+<body>
+    <div class="container mt-5 rounded shadow p-4">
+        <h2 class="text-center mb-4">Data Maskapai</h2> <!--Judul Halaman-->
+        
+        <!-- Tombol Tambah Data -->
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <!-- Mengarahkan pengguna untuk ke halaman post.html -->
+            <a href="post.html" class="btn btn-primary">Tambah Maskapai</a> 
+            <div class="input-group w-25">
+                <!-- untuk mencari maskapai berdasarkan nama atau kode maskapai. -->
+                <input type="text" id="searchInput" class="form-control" placeholder="Cari...">
+                <button class="btn btn-primary" onclick="searchData()">Cari</button>
+            </div>
+        </div>
+
+        <!-- Tabel Data -->
+        <div class="table-responsive"> <!-- tabel ini akan menyesuaikan dengan lebar layar perangkat -->
+             <table class="table table-bordered text-center align-middle"> <!-- Tabel dengan garis tepi -->
+                <thead class="table-secondary"> <!-- tabel dengan warna abu-abu -->
+                    <tr>
+                        <th>Id Maskapai</th>
+                        <th>Nama Maskapai</th>
+                        <th>Kode Maskapai</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody id="dataBody"> <!--digunakan agar kita bisa dengan mudah memanipulasi kontennya menggunakan JavaScript.-->
+                    <tr>
+                        <td colspan="4">Memuat data...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Modal Detail -->
+    <div class="modal fade" id="adminModalDetail" tabindex="-1"> <!-- menampilkan detail maskapai.-->
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Detail Maskapai</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="modalDetailBody">
+                    <p><strong>Id Maskapai:</strong> </p>
+                    <p><strong>Nama Maskapai:</strong> </p>
+                    <p><strong>Kode Maskapai:</strong> </p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                </div>
+                
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Konfirmasi Hapus -->
+    <div class="modal fade" id="deleteModal" tabindex="-1"> <!--untuk konfirmasi menghapus maskapai-->
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Konfirmasi Hapus</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    Yakin ingin menghapus data maskapai ini?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Hapus</button> <!--Tombol untuk konfirmasi hapus-->
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script src="../public/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Fungsi untuk memuat data maskapai dari API dan menampilkannya di tabel(Get)
+    async function loadData() {
+        try {
+            const response = await fetch('http://localhost:3100/maskapai'); <!--Menunggu respons dari server-->
+            const data = await response.json();
+
+            let dataBody = document.getElementById('dataBody');
+            dataBody.innerHTML = '';  // Kosongkan tabel sebelum diisi ulang
+
+            data.forEach(maskapai => {
+                let row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${maskapai.id_maskapai}</td>
+                    <td>${maskapai.nama_maskapai}</td>
+                    <td>${maskapai.kode_maskapai}</td>
+                    <td>
+                        <button class="btn btn-info btn-sm" onclick="showDetail(${maskapai.id_maskapai})">Detail</button>
+                        <a href="put.html?id=${maskapai.id_maskapai}" class="btn btn-warning btn-sm">Edit</a>
+                        <button class="btn btn-danger btn-sm" onclick="deleteData(${maskapai.id_maskapai})">Hapus</button>
+                    </td>
+                `;
+                dataBody.appendChild(row);
+            });
+        } catch (err) {
+            console.error('Error loading data:', err);
+        }
+    }
+
+    // Fungsi untuk mencari data berdasarkan input pencarian
+    async function searchData() {
+        const searchQuery = document.getElementById('searchInput').value;
+        try {
+            const response = await fetch(`http://localhost:3100/maskapai?search=${searchQuery}`);
+            const data = await response.json();
+
+            let dataBody = document.getElementById('dataBody');
+            dataBody.innerHTML = '';
+            data.forEach(maskapai => {
+                let row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${maskapai.id_maskapai}</td>
+                    <td>${maskapai.nama_maskapai}</td>
+                    <td>${maskapai.kode_maskapai}</td>
+                    <td>
+                        <a href="put.html?id=${maskapai.id_maskapai}" class="btn btn-warning btn-sm">Edit</a>
+                        <button class="btn btn-danger btn-sm" onclick="deleteData(${maskapai.id_maskapai})">Hapus</button>
+                    </td>
+                `;
+                dataBody.appendChild(row);
+            });
+        } catch (err) {
+            console.error('Error searching data:', err);
+        }
+    }
+
+    // Fungsi untuk menghapus data maskapai
+    async function deleteData(id_maskapai) {
+        if (confirm('Yakin ingin menghapus maskapai ini?')) {
+            try {
+                const response = await fetch(`http://localhost:3100/maskapai/${id_maskapai}`, {
+                    method: 'DELETE'
+                });
+                const data = await response.json();
+                alert(data.message);
+                loadData();  // Refresh data setelah dihapus
+            } catch (err) {
+                console.error('Error deleting data:', err);
+            }
+        }
+    }
+    
+    async function showDetail(id_maskapai) {
+    try {
+        const response = await fetch(`http://localhost:3100/maskapai/${id_maskapai}`);
+        const maskapai = await response.json();
+
+        // Memasukkan data ke dalam modal
+        let modalBody = document.getElementById('modalDetailBody');
+        modalBody.innerHTML = `
+            <p><strong>Id Maskapai:</strong> ${maskapai.id_maskapai}</p>
+            <p><strong>Nama Maskapai:</strong> ${maskapai.nama_maskapai}</p>
+            <p><strong>Kode Maskapai:</strong> ${maskapai.kode_maskapai}</p>
+        `;
+
+        // Menampilkan modal
+        let modal = new bootstrap.Modal(document.getElementById('adminModalDetail'));
+        modal.show();
+    } catch (err) {
+        console.error('Error loading detail:', err);
+    }
+}
+
+    // Memuat data saat halaman dimuat
+    window.onload = loadData;
+</script>
+</body>
+</html>

@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Update Data Maskapai</title>
+    <link rel="stylesheet" href="../public/css/bootstrap.min.css">
+    <style>
+        body {
+            background-image: url('Pastel Color Wallpaper.jpg'); /* Menambahkan gambar latar belakang di body */
+            background-size: cover; /* Agar gambar menutupi seluruh area */
+            background-position: center; /* Menempatkan gambar di tengah */
+            background-attachment: fixed; /* Agar gambar tetap di tempat saat discroll */
+            }
+        .table-responsive {
+            background-color: white; /* Latar belakang tabel tetap putih */
+            padding: 20px;  /* Menambahkan padding agar ada ruang di sekitar tabel */
+        }
+
+        table {
+            background-color: white; /* Pastikan tabel tetap memiliki latar belakang putih */
+            border-radius: 8px; /* Tambahkan border-radius jika ingin sudut tabel melengkung */
+        }
+    </style> 
+</head>
+<body>
+    <!-- Membuat wadah halaman dg flexbox agar form berada di tengah-->
+    <div class="container d-flex justify-content-center align-items-center min-vh-100">
+        <div class="w-50 bg-white p-4 rounded shadow">
+            <h2 class="text-center mb-4">Update Data Maskapai</h2>
+            <form id="updateForm">
+                <!-- Input Id Maskapai -->
+                <div class="mb-3">
+                    <label for="id" class="form-label">Id Maskapai</label>
+                    <input type="text" class="form-control" id="id" name="id" placeholder="id maskapai" readonly>
+                </div>
+
+                <!-- Input Nama Maskapai -->
+                <div class="mb-3">
+                    <label for="nama" class="form-label">Nama Maskapai</label>
+                    <input type="text" class="form-control" id="nama" name="nama" placeholder="Nama maskapai" required>
+                </div>
+
+                <!-- Input Kode Maskapai -->
+                <div class="mb-3">
+                    <label for="kode_maskapai" class="form-label">Kode Maskapai</label>
+                    <input type="text" class="form-control" id="kode_maskapai" name="kode_maskapai" placeholder="Kode maskapai" required>
+                </div>
+
+                <!-- Tombol -->
+                <div class="d-flex justify-content-between">
+                    <button type="submit" class="btn btn-success">Update</button>
+                    <a href="home.html" class="btn btn-secondary">Kembali</a> <!--Tombol kembali ke home.html-->
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="../public/js/bootstrap.bundle.min.js"></script> <!--path relatif yang mengarah ke file JavaScript yang dimaksud-->
+    <script>
+        // Mengambil id dari URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const id_maskapai = urlParams.get('id'); // Misalnya URL = put.html?id=1
+
+        // Ambil data maskapai untuk diedit
+        window.onload = async function() {
+            if (id_maskapai) {
+                try {
+                    const response = await fetch(`http://localhost:3100/maskapai/${id_maskapai}`);
+                    const result = await response.json();
+
+                    if (response.ok && result) {
+                        // Isi form dengan data yang ada
+                        document.getElementById('id').value = result.id_maskapai;
+                        document.getElementById('nama').value = result.nama_maskapai;
+                        document.getElementById('kode_maskapai').value = result.kode_maskapai;
+                    } else {
+                        alert('Data maskapai tidak ditemukan!');
+                    }
+                } catch (err) {
+                    console.error('Error:', err);
+                    alert('Terjadi kesalahan saat memuat data maskapai.');
+                }
+            }
+        };
+
+        // Proses update data maskapai
+        document.getElementById('updateForm').addEventListener('submit', async function (e) {
+            e.preventDefault();  // Menghentikan pengiriman form biasa
+
+            const id = document.getElementById('id').value;
+            const nama_maskapai = document.getElementById('nama').value;
+            const kode_maskapai = document.getElementById('kode_maskapai').value;
+
+            try {
+                const response = await fetch(`http://localhost:3100/maskapai/${id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        nama_maskapai,
+                        kode_maskapai
+                    })
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    alert('Maskapai berhasil diperbarui!');
+                    window.location.href = 'home.html'; // Kembali ke halaman utama setelah update
+                } else {
+                    alert('Gagal memperbarui maskapai: ' + result.error);
+                }
+            } catch (err) {
+                console.error('Error:', err);
+                alert('Terjadi kesalahan saat memperbarui data maskapai.');
+            }
+        });
+    </script>
+</body>
+</html>

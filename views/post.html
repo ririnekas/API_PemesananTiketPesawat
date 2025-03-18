@@ -1,0 +1,89 @@
+<!DOCTYPE html> <!--deklarasi bahwa kode ini html-->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tambah Data Maskapai</title>
+    <link rel="stylesheet" href="../public/css/bootstrap.min.css">
+    <style>
+        body {
+            background-image: url('Pastel Color Wallpaper.jpg'); /* Menambahkan gambar latar belakang di body */
+            background-size: cover; /* Agar gambar menutupi seluruh area */
+            background-position: center; /* Menempatkan gambar di tengah */
+            background-attachment: fixed; /* Agar gambar tetap di tempat saat discroll */
+            }
+
+        .table-responsive {
+            background-color: white; /* Latar belakang tabel tetap putih */
+            padding: 20px;  /* Menambahkan padding agar ada ruang di sekitar tabel */
+        }
+
+        table {
+            background-color: white; /* Pastikan tabel tetap memiliki latar belakang putih */
+            border-radius: 8px; /* Tambahkan border-radius jika ingin sudut tabel melengkung */
+        }
+    </style>                                   
+</head>
+<body>  
+    <div class="container d-flex justify-content-center align-items-center min-vh-100">
+        <!-- Mengatur agar elemen di dalam flexbox diratakan ke tengah secara horizontal. -->
+        <div class="w-50 bg-white p-4 rounded shadow"> <!--Lebar 50%, bg white, padding 4, efek bayangan-->
+            <h2 class="text-center mb-4">Tambah Data Maskapai</h2> <!--Judul Halaman-->
+            <form id="maskapaiForm">
+                <div class="mb-3">
+                    <!--Input Nama Maskapai -->
+                    <label for="nama_maskapai" class="form-label">Nama Maskapai : </label>
+                    <input type="text" class="form-control" id="nama_maskapai" name="nama" placeholder="Masukkan nama maskapai" required>
+                </div>
+
+                <div class="mb-3">
+                    <!-- Input Kode Maskapai -->
+                    <label for="kode_maskapai" class="form-label">Kode Maskapai :</label>
+                    <input type="text" class="form-control" id="kode_maskapai" name="kode_maskapai" placeholder="Masukkan kode maskapai" required>
+                </div>
+
+                <div class="d-flex justify-content-between">
+                    <button type="submit" class="btn btn-primary">Tambah</button><!--Tombol menambah-->
+                    <a href="home.html" class="btn btn-secondary">Kembali</a><!--Tombol kembali-->
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="../public/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.getElementById('maskapaiForm').addEventListener('submit', async function (e) {
+            e.preventDefault();  // Menghentikan pengiriman form biasa
+
+            // Ambil data dari formulir
+            const nama_maskapai = document.getElementById('nama_maskapai').value;
+            const kode_maskapai = document.getElementById('kode_maskapai').value;
+
+            try {
+                const response = await fetch('http://localhost:3100/maskapai', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        nama_maskapai,
+                        kode_maskapai
+                    })
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    alert('Maskapai berhasil ditambahkan!');
+                    window.location.href = 'home.html'; // Kembali ke halaman utama setelah sukses
+                } else {
+                    alert('Gagal menambahkan maskapai: ' + result.error);
+                }
+            } catch (err) {
+                console.error('Error:', err);
+                alert('Terjadi kesalahan saat menambahkan data maskapai.');
+            }
+        });
+    </script>
+</body>
+</html>
